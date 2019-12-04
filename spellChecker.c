@@ -6,6 +6,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#define MIN3(a, b, c) ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
+
 /**
  * Allocates a string for the next word in the file and returns it. This string
  * is null terminated. Returns NULL after reaching the end of the file.
@@ -144,6 +146,27 @@ void getString(char *input)
     toLowerCase(input);
 }
 
+int levenshtein(char *s1, char *s2)
+{
+    unsigned int s1len, s2len, x, y, lastdiag, olddiag;
+    s1len = strlen(s1);
+    s2len = strlen(s2);
+    unsigned int column[s1len + 1];
+    for (y = 1; y <= s1len; y++)
+        column[y] = y;
+    for (x = 1; x <= s2len; x++)
+    {
+        column[0] = x;
+        for (y = 1, lastdiag = x - 1; y <= s1len; y++)
+        {
+            olddiag = column[y];
+            column[y] = MIN3(column[y] + 1, column[y - 1] + 1, lastdiag + (s1[y - 1] == s2[x - 1] ? 0 : 1));
+            lastdiag = olddiag;
+        }
+    }
+    return (column[s1len]);
+}
+
 /**
  * Checks the spelling of the word provded by the user. If the word is spelled incorrectly,
  * print the 5 closest words as determined by a metric like the Levenshtein distance.
@@ -182,12 +205,21 @@ int main(int argc, const char **argv)
         }
         else if (hashMapContainsKey(map, inputBuffer))
         {
-            printf("That word is spelled correctly\n");
+            printf("The inputted word, \"%s\" is spelled correctly.\n\n", inputBuffer);
         }
+        // The word is spelled incorrectly. Compute Levenshtein distance and print suggestions.
         else
         {
-            // suggest "did you mean?" words
-            printf("i'm on suggestions bbbbbb hi\n");
+            // compute levenshtein distance for the value for each key in the table
+
+            // generate an array of 5 words that are closest matches to inputBuffer based on lowest L distance
+            printf("The inputted word \"%s\" is spelled incorrectly.\n", inputBuffer);
+            printf("Did you mean ...\n");
+            printf("    word1\n");
+            printf("    word1\n");
+            printf("    word1\n");
+            printf("    word1\n");
+            printf("    word5\n\n");
         }
     }
 
