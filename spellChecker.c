@@ -187,7 +187,7 @@ int main(int argc, const char **argv)
         else
         {
             // suggest "did you mean?" words
-            printf("Incorrect spelling\n");
+            printf("Incorrect spelling. this is on a new branch. hi\n");
         }
     }
 
