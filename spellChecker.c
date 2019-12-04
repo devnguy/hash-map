@@ -146,6 +146,9 @@ void getString(char *input)
     toLowerCase(input);
 }
 
+/**
+ * Compares two strings and calculates their LeveinShtein distance.
+ */
 int levenshtein(char *s1, char *s2)
 {
     unsigned int s1len, s2len, x, y, lastdiag, olddiag;
@@ -168,6 +171,66 @@ int levenshtein(char *s1, char *s2)
 }
 
 /**
+ * Compares the given string to each word in the dictionary, calculating the Levenshtein 
+ * distance. Assigns that value for each key in the table.
+ */
+void assignDistance(HashMap *map, char *word)
+{
+    int currentSize = 0;
+    char **related[5]; // array keeping track of 5 words with the lowest distance
+    HashLink *current;
+
+    for (int i = 0, mapSize = map->capacity; i < mapSize; i++)
+    {
+        current = map->table[i];
+        while (current != NULL)
+        {
+            current->value = levenshtein(word, current->key);
+
+            // by default, add to array if there is room
+        }
+    }
+}
+
+struct RelatedWords
+{
+    char **words;
+    int capacity;
+    int size;
+    int max;
+};
+
+/**
+ * Creates a RelatedWords struct, allocating memory for a the array given the
+ * number of words the array should hold.
+ * @param capacity The number of words.
+ * @return The allocated words struct.
+ */
+struct RelatedWords *relatedWordsNew(int capacity)
+{
+    struct RelatedWords *related = malloc(sizeof(struct RelatedWords));
+    related->words = malloc(sizeof(char *) * capacity);
+    related->capacity = capacity;
+    related->size = 0;
+    related->max = 0;
+    return related;
+}
+
+void relatedWordsDelete(struct RelatedWords *related)
+{
+    free(related->words);
+    related->words = NULL;
+    free(related);
+}
+
+void relatedWordsPrint(struct RelatedWords *related)
+{
+    for (int i = 0, size = related->size; i < size; i++)
+    {
+    }
+}
+
+/**
  * Checks the spelling of the word provded by the user. If the word is spelled incorrectly,
  * print the 5 closest words as determined by a metric like the Levenshtein distance.
  * Otherwise, indicate that the provded word is spelled correctly. Use dictionary.txt to
@@ -181,7 +244,9 @@ int main(int argc, const char **argv)
     // FIXME: implement
     HashMap *map = hashMapNew(1000);
 
-    FILE *file = fopen("dictionary.txt", "r");
+    struct RelatedWords *suggestions =
+
+        FILE *file = fopen("dictionary.txt", "r");
     clock_t timer = clock();
     loadDictionary(file, map);
     timer = clock() - timer;
