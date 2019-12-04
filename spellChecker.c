@@ -187,7 +187,7 @@ int main(int argc, const char **argv)
         else
         {
             // suggest "did you mean?" words
-            printf("i'm on suggestions b\n");
+            printf("i'm on suggestions bbbbbb hi\n");
         }
     }
 
