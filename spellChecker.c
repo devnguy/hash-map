@@ -171,62 +171,79 @@ int levenshtein(char *s1, char *s2)
 }
 
 /**
- * Compares the given string to each word in the dictionary, calculating the Levenshtein 
- * distance. Assigns that value for each key in the table.
+ * Compares the given string (word) to each word in the dictionary. If an exact match is found,
+ * the function returns true. If the word is not a match, calculates the Levenshtein distance 
+ * and assigns that value for the key in the table. If the entire table is traversed and no 
+ * match is found, returns false.
  */
-void assignDistance(HashMap *map, char *word)
+int findMatch(HashMap *map, char *word)
 {
-    int currentSize = 0;
-    char **related[5]; // array keeping track of 5 words with the lowest distance
     HashLink *current;
 
-    for (int i = 0, mapSize = map->capacity; i < mapSize; i++)
+    for (int i = 0, cap = map->capacity; i < cap; i++)
     {
         current = map->table[i];
         while (current != NULL)
         {
-            current->value = levenshtein(word, current->key);
-
-            // by default, add to array if there is room
+            // exact match is found, return true
+            if (strcmp((current->key), word) == 0)
+            {
+                return 1;
+            }
+            // assign Lev distance and move on to next word
+            else
+            {
+                current->value = levenshtein(word, current->key);
+                current = current->next;
+            }
         }
     }
+    return 0;
 }
-
-struct RelatedWords
-{
-    char **words;
-    int capacity;
-    int size;
-    int max;
-};
 
 /**
- * Creates a RelatedWords struct, allocating memory for a the array given the
- * number of words the array should hold.
- * @param capacity The number of words.
- * @return The allocated words struct.
+ * Traverses the given map adding 5 words with the lowest Levenshtein distance 
+ * to the given array.
  */
-struct RelatedWords *relatedWordsNew(int capacity)
+void findRelatedWords(HashMap *map, char **relatedWords)
 {
-    struct RelatedWords *related = malloc(sizeof(struct RelatedWords));
-    related->words = malloc(sizeof(char *) * capacity);
-    related->capacity = capacity;
-    related->size = 0;
-    related->max = 0;
-    return related;
-}
+    HashLink *current;
+    int maxIndex = 4;
+    int indexToAdd = 0;
+    int currentMax = 1000;
 
-void relatedWordsDelete(struct RelatedWords *related)
-{
-    free(related->words);
-    related->words = NULL;
-    free(related);
-}
-
-void relatedWordsPrint(struct RelatedWords *related)
-{
-    for (int i = 0, size = related->size; i < size; i++)
+    for (int i = 0, cap = map->capacity; i < cap; i++)
     {
+        current = map->table[i];
+        while (current != NULL)
+        {
+            // add first 5 words because the array is empty
+            if (i < 5)
+            {
+                relatedWords[indexToAdd] = current->key;
+                if (current->value <= currentMax)
+                {
+                    currentMax = current->value;
+                }
+                indexToAdd++;
+            }
+            // only add the word if the value is less than currentMax
+            else
+            {
+                if (current->value <= currentMax)
+                {
+                    relatedWords[indexToAdd] = current->key;
+                    currentMax = current->value;
+                    indexToAdd++;
+                }
+            }
+
+            if (indexToAdd > maxIndex)
+            {
+                indexToAdd = 0;
+            }
+            current = current->next;
+        }
     }
 }
 
@@ -243,10 +260,11 @@ int main(int argc, const char **argv)
 {
     // FIXME: implement
     HashMap *map = hashMapNew(1000);
+    int numberOfRelatedWords = 5;
 
-    struct RelatedWords *suggestions =
+    char **relatedWords = malloc(sizeof(char *) * numberOfRelatedWords);
 
-        FILE *file = fopen("dictionary.txt", "r");
+    FILE *file = fopen("dictionary.txt", "r");
     clock_t timer = clock();
     loadDictionary(file, map);
     timer = clock() - timer;
@@ -268,26 +286,25 @@ int main(int argc, const char **argv)
         {
             quit = 1;
         }
-        else if (hashMapContainsKey(map, inputBuffer))
+
+        else if (findMatch(map, inputBuffer))
         {
             printf("The inputted word, \"%s\" is spelled correctly.\n\n", inputBuffer);
         }
-        // The word is spelled incorrectly. Compute Levenshtein distance and print suggestions.
         else
         {
-            // compute levenshtein distance for the value for each key in the table
-
-            // generate an array of 5 words that are closest matches to inputBuffer based on lowest L distance
+            findRelatedWords(map, relatedWords);
             printf("The inputted word \"%s\" is spelled incorrectly.\n", inputBuffer);
             printf("Did you mean ...\n");
-            printf("    word1\n");
-            printf("    word1\n");
-            printf("    word1\n");
-            printf("    word1\n");
-            printf("    word5\n\n");
+            for (int i = 0; i < numberOfRelatedWords; i++)
+            {
+                printf("    %s\n", relatedWords[i]);
+            }
+            printf("\n");
         }
     }
 
+    free(relatedWords);
     hashMapDelete(map);
     return 0;
 }
