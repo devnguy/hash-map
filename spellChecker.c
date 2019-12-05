@@ -129,7 +129,7 @@ void getString(char *input)
     {
         if (isInvalid)
         {
-            printf("Invalid input\n");
+            printf("\nInvalid input\n\n");
             printf("Enter one word with upper/lowercase letters only: ");
             isInvalid = 0;
         }
