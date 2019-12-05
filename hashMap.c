@@ -83,17 +83,10 @@ void hashMapInit(HashMap *map, int capacity)
  */
 void hashMapCleanUp(HashMap *map)
 {
-    // FIXME: implement
-    // iterate through the array
-    // current = array[i]
-    // while current != null
-    // nextLink = current->next
-    // delete current
-    // current = nextLink
     HashLink *current;
     HashLink *nextLink;
 
-    // free all links
+    // Free all links.
     for (int i = 0, cap = map->capacity; i < cap; i++)
     {
         current = map->table[i];
@@ -104,9 +97,7 @@ void hashMapCleanUp(HashMap *map)
             current = nextLink;
         }
     }
-    // free the table
     free(map->table);
-    // map->table = NULL;
 }
 
 /**
@@ -182,7 +173,7 @@ void resizeTable(HashMap *map, int capacity)
     HashMap *newMap = hashMapNew(capacity);
     HashLink *current;
 
-    // hash each link in oldMap and put in newMap
+    // Hash each link in oldMap and put in newMap
     for (int i = 0, cap = map->capacity; i < cap; i++)
     {
         current = map->table[i];
@@ -193,11 +184,11 @@ void resizeTable(HashMap *map, int capacity)
         }
     }
 
-    hashMapCleanUp(map);        // should free the old table
-    map->table = newMap->table; // set table to newTable
+    hashMapCleanUp(map);        // Should free the old table
+    map->table = newMap->table; // Set table to newTable
     map->capacity = newMap->capacity;
     map->size = newMap->size;
-    free(newMap); // delete the newly allocated table
+    free(newMap); // Delete the newly allocated table
 }
 
 /**
@@ -223,7 +214,7 @@ void hashMapPut(HashMap *map, const char *key, int value)
 
     if (hashMapContainsKey(map, key))
     {
-        // find the key, replace the value at that link
+        // Find the key, replace the value at that link.
         while (strcmp(current->key, key) != 0)
         {
             current = current->next;
@@ -232,15 +223,15 @@ void hashMapPut(HashMap *map, const char *key, int value)
     }
     else
     {
-        // key does not exist so allocate a new link
+        // Key does not exist, so allocate a new link.
         HashLink *newLink = hashLinkNew(key, value, NULL);
 
-        // case 1: this is the first link being added to the list so set head to newLink
+        // This is the first link being added to the list so set head to newLink
         if (current == NULL)
         {
             map->table[hashIndex] = newLink;
         }
-        // case 2: list exists so traverse to the end
+        // List already exists so traverse to the end.
         else
         {
             while (current->next != NULL)
@@ -266,7 +257,6 @@ void hashMapPut(HashMap *map, const char *key, int value)
  */
 void hashMapRemove(HashMap *map, const char *key)
 {
-    // FIXME: implement
     assert(map != 0);
     assert(key != 0);
 
@@ -286,7 +276,7 @@ void hashMapRemove(HashMap *map, const char *key)
             {
                 prev->next = current->next;
             }
-            // delete link and dec count, end function
+            // Delete link and dec count, end function.
             hashLinkDelete(current);
             map->size--;
             return;
@@ -311,12 +301,10 @@ int hashMapContainsKey(HashMap *map, const char *key)
     assert(map != 0);
     assert(key != 0);
 
-    // calculate the index
     int hashIndex = HASH_FUNCTION(key) % hashMapCapacity(map);
 
     struct HashLink *current = map->table[hashIndex];
 
-    // check each link to see if it equals the key
     while (current != NULL)
     {
         if (strcmp((current->key), key) == 0)

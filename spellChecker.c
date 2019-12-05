@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 
+// Required by Levenshtein calculation.
 #define MIN3(a, b, c) ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
 
 /**
@@ -117,7 +118,7 @@ void toLowerCase(char *stringToConvert)
 
 /**
  * Input validation function that continues to prompt the user for a string 
- * that meets the program's specifications: One word, no nonalpha chars
+ * that meets the program's specifications: One word, no nonalpha chars.
  * Stores in the validated string in the provided argument.
  */
 void getString(char *input)
@@ -142,12 +143,12 @@ void getString(char *input)
     } while (isInvalid);
 
     printf("\n");
-    // Convert validated string to lowercase
+    // Convert validated string to lowercase.
     toLowerCase(input);
 }
 
 /**
- * Compares two strings and calculates their LeveinShtein distance.
+ * Compares two strings and calculates their Leveinshtein distance.
  */
 int levenshtein(char *s1, char *s2)
 {
@@ -171,8 +172,8 @@ int levenshtein(char *s1, char *s2)
 }
 
 /**
- * Compares the given string (word) to each word in the dictionary. If an exact match is found,
- * the function returns true. If the word is not a match, calculates the Levenshtein distance 
+ * Compares the given string to each word in the dictionary. If an exact match is found, the 
+ * function returns true. If the word is not a match, calculates the Levenshtein distance 
  * and assigns that value for the key in the table. If the entire table is traversed and no 
  * match is found, returns false.
  */
@@ -185,12 +186,12 @@ int findMatch(HashMap *map, char *word)
         current = map->table[i];
         while (current != NULL)
         {
-            // exact match is found, return true
+            // Exact match is found, return true.
             if (strcmp((current->key), word) == 0)
             {
                 return 1;
             }
-            // assign Lev distance and move on to next word
+            // Assign Lev distance and move on to next word.
             else
             {
                 current->value = levenshtein(word, current->key);
@@ -202,8 +203,10 @@ int findMatch(HashMap *map, char *word)
 }
 
 /**
- * Traverses the given map adding 5 words with the lowest Levenshtein distance 
- * to the given array.
+ * Traverses the given map, maintaining an array of 5 words with the 
+ * lowest Levenshtein distance.
+ * @param map to traverse
+ * @param relatedWords an array to store the words
  */
 void findRelatedWords(HashMap *map, char **relatedWords)
 {
@@ -217,7 +220,7 @@ void findRelatedWords(HashMap *map, char **relatedWords)
         current = map->table[i];
         while (current != NULL)
         {
-            // add first 5 words because the array is empty
+            // Add first 5 words because the array is empty.
             if (i < 5)
             {
                 relatedWords[indexToAdd] = current->key;
@@ -227,7 +230,7 @@ void findRelatedWords(HashMap *map, char **relatedWords)
                 }
                 indexToAdd++;
             }
-            // only add the word if the value is less than currentMax
+            // Only add the word if the value <= currentMax.
             else
             {
                 if (current->value <= currentMax)
@@ -238,6 +241,7 @@ void findRelatedWords(HashMap *map, char **relatedWords)
                 }
             }
 
+            // Reset the index to start over once the end of the array is reached.
             if (indexToAdd > maxIndex)
             {
                 indexToAdd = 0;
@@ -258,10 +262,8 @@ void findRelatedWords(HashMap *map, char **relatedWords)
  */
 int main(int argc, const char **argv)
 {
-    // FIXME: implement
     HashMap *map = hashMapNew(1000);
     int numberOfRelatedWords = 5;
-
     char **relatedWords = malloc(sizeof(char *) * numberOfRelatedWords);
 
     FILE *file = fopen("dictionary.txt", "r");
@@ -277,20 +279,19 @@ int main(int argc, const char **argv)
     while (!quit)
     {
         printf("Enter a word or \"quit\" to quit: ");
-        // scanf("%s", inputBuffer);
         getString(inputBuffer); // replaced provided scanf with input validation function
 
-        // Implement the spell checker code here..
-
+        // Case 1: User types "quit" to exit program.
         if (strcmp(inputBuffer, "quit") == 0)
         {
             quit = 1;
         }
-
+        // Case 2: Input matches word found in dictionary.
         else if (findMatch(map, inputBuffer))
         {
             printf("The inputted word, \"%s\" is spelled correctly.\n\n", inputBuffer);
         }
+        // Case 3: Input is spelled incorrectly. Find and print related words.
         else
         {
             findRelatedWords(map, relatedWords);
