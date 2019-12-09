@@ -208,10 +208,10 @@ int findMatch(HashMap *map, char *word)
  * @param map to traverse
  * @param relatedWords an array to store the words
  */
-void findRelatedWords(HashMap *map, char **relatedWords)
+void findRelatedWords(HashMap *map, char **relatedWords, int size)
 {
     HashLink *current;
-    int maxIndex = 4;
+    int maxIndex = size - 1;
     int indexToAdd = 0;
     int currentMax = 1000;
 
@@ -220,8 +220,8 @@ void findRelatedWords(HashMap *map, char **relatedWords)
         current = map->table[i];
         while (current != NULL)
         {
-            // Add first 5 words because the array is empty.
-            if (i < 5)
+            // Fill the array with words because the array is empty.
+            if (i < size)
             {
                 relatedWords[indexToAdd] = current->key;
                 if (current->value <= currentMax)
@@ -294,7 +294,7 @@ int main(int argc, const char **argv)
         // Case 3: Input is spelled incorrectly. Find and print related words.
         else
         {
-            findRelatedWords(map, relatedWords);
+            findRelatedWords(map, relatedWords, numberOfRelatedWords);
             printf("The inputted word \"%s\" is spelled incorrectly.\n", inputBuffer);
             printf("Did you mean ...\n");
             for (int i = 0; i < numberOfRelatedWords; i++)
